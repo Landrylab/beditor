@@ -9,8 +9,8 @@ pandoc --from=markdown --to=rst --output=README.rst R
 EADME.md
 -->
 
-A computational workflow for designing libraries of guide RNAs for
-CRISPR base editing
+A computational workflow for designing libraries of guide RNAs for CRISPR base editing  
+Pre-print: https://doi.org/10.1101/426973
 
 Table of Contents
 -----------------
@@ -23,12 +23,13 @@ Table of Contents
 
 Installation
 ------------
+Requirements: [`Anaconda package manager`](https://www.anaconda.com/download/#linux) and bunch of linux-specific libraries (gcc make make-guile git zlib1g-dev libncurses5-dev and libbz2-dev). See [requirements.md](https://github.com/rraadd88/test_beditor/blob/master/requirements.md) for set of bash commands that would install all the requirements of `beditor`.
 
-1.  Create a virtual environment.
+1.  Once all the requirements are satisfied, create a python 3.6 virtual environment.
 
 ``` {.sourceCode .text}
-cd beditor
-conda create -f environment.yml
+wget https://raw.githubusercontent.com/rraadd88/beditor/master/environment.yml
+conda env create -f environment.yml
 ```
 
 2.  Activate the virtual environment.
@@ -37,16 +38,52 @@ conda create -f environment.yml
 source activate beditor
 ```
 
-3.  Run the analysis.
+3. Install `beditor` python package from pypi.
+
+``` {.sourceCode .text}
+pip install beditor
+```
+
+Usage
+-----
+
+1.  Run the analysis.
 
 ``` {.sourceCode .text}
 beditor --cfg configuration.yml
 ```
 
-Configuration file (configuration.yml)
---------------------------------------
+2.  Run a single step in the analysis.
 
-It contains the all the analysis specific parameters.
+``` {.sourceCode .text}
+beditor --cfg --step {step number} configuration.yml
+```
+`step number` and corresponding analysis:
+
+``` {.sourceCode .text}
+1: Get genomic loci flanking the target site
+2: Get possible mutagenesis strategies
+3: Design guides
+4: Check offtarget-effects
+``` 
+
+3. To list existing pams and editors
+
+``` {.sourceCode .text}
+beditor --list pams
+beditor --list editors
+```
+
+4. Help
+
+``` {.sourceCode .text}
+beditor --help
+```
+
+Configuration file
+------------------
+
+This YAML formatted file contains the all the analysis specific parameters.
 
 Template:
 <https://github.com/rraadd88/test_beditor/blob/master/common/configuration.yml>
@@ -67,7 +104,7 @@ Output format
 mutation_format opted in configuration.yml file and corresponding columns needed in input: 
 
 nucleotide :  ['genome coordinate','nucleotide wild-type','nucleotide mutation',]
-nucleotide : ['transcript: id','aminoacid: wild-type','aminoacid: position','amino acid mutation','codon: wild-type','guide: id','guide+PAM sequence','beditor score','alternate alignments count','CFD score']
+aminoacid : ['transcript: id','aminoacid: wild-type','aminoacid: position','amino acid mutation','codon: wild-type','guide: id','guide+PAM sequence','beditor score','alternate alignments count','CFD score']
 ```
 
 Format of `guide: id`:
@@ -108,13 +145,6 @@ If parallel processing is used, this folder would store individual parts (chunks
 How to install new base editor or PAM
 -------------------------------------
 
-To list existing pams and editors
-
-``` {.sourceCode .text}
-beditor --list pams
-beditor --list editors
-```
-
 This information is located in beditor/data (use `which beditor` to locate directory of beditor) directory in tab-separated table format (`dBEs.tsv` and `dpams.tsv`).
 In order to install new base editor or PAM, user would have to simply append the relevant information in the tables.
 
@@ -129,9 +159,7 @@ How to analyze test datasets
 ``` {.sourceCode .text}
 # make the input files with mock data
 git clone https://github.com/rraadd88/test_beditor.git
-source activate beditor;cd test_beditor;python make_datasets.py
-# command to analyze mock input data of a species
-source activate beditor;cd dataset_{species name};beditor --cfg {name of the .yml file}
+source activate beditor;cd test_beditor;python test_datasets.py
 ```
 
 API

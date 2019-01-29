@@ -85,7 +85,10 @@ def get_seq_aminoacid(cfg,din):
                 coding_sequence_positions=tboundaries2positions(t)
                 if len(coding_sequence_positions)==len(t.coding_sequence):
                 #TODO     need to check if the seq made from coding_sequence_positions is same as t.coding_seqeunce
-                    dcoding=t2pmapper(t,coding_sequence_positions)
+                    try:
+                        dcoding=t2pmapper(t,coding_sequence_positions)
+                    except:
+                        continue
                     dcodingmutpos=dcoding.loc[(dcoding['protein index']==din.loc[i,'aminoacid: position']),:]
                     codon_positions=dcodingmutpos['coding sequence positions'].tolist()
                     if len(codon_positions)!=0:
@@ -123,11 +126,17 @@ def get_seq_aminoacid(cfg,din):
             terrnotfound.append(din.loc[i,'transcript: id'])
             if cfg['test']:
                 logging.error('not found: {}'.format(din.loc[i,'transcript: id']))
+    if len(dbed)==0:
+        from beditor.lib.global_vars import saveemptytable
+        logging.warning('no valid seqeunces found; saving an empty table.')
+        saveemptytable(cfg,f"{cfg['dsequencesp']}")
+        return None
     dbed=dbed.loc[(dbed.apply(lambda x : x['end']-x['start']==45, axis=1)),:] #FIXME put flank in the yml
 
     dbed.loc[:,'start']=dbed.loc[:,'start'].astype(int)
     dbed.loc[:,'end']=dbed.loc[:,'end'].astype(int)
     
+    dbed=dbed.drop_duplicates(subset=bed_colns)                    
     dbed.loc[:,bed_colns].to_csv(dbedp,sep='\t',
                     header=False,index=False)
     err2tids={'terrpositions':terrpositions,
